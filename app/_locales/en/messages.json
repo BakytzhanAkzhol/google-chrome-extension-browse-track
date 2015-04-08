@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "browse-tracks",
+    "description": "The name of the application"
+  },
+  "appDescription": {
+    "message": "Count time tab",
+    "description": "The description of the application"
+  }
+}
