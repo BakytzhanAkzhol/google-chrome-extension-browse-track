@@ -24,6 +24,7 @@
   },
   "permissions": [
     "storage",
+    "alarms",
     "tabs",
     "activeTab",
     "https://ajax.googleapis.com/",

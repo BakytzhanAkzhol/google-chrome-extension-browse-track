@@ -52,8 +52,11 @@
     });
   };
   var timer;
+  chrome.alarms.onAlarm.addListener(function( alarm ) {
+    console.log("Got an alarm!", alarm);
+  });
   chrome.tabs.onActivated.addListener(function(activeInfo) {
-    console.log("Select " + activeInfo.tabId + " ");
+    //console.log("Select " + activeInfo.tabId + " ");
     Stat.curTabId = activeInfo.tabId;
     return chrome.tabs.get(activeInfo.tabId, function(tab) {
       if (tab.url) {
@@ -61,6 +64,9 @@
       }
       timer=window.setInterval(function() {
        if (!Stat.curTabId) {
+        console.log("Interval is cleaner");
+        clearInterval(timer);
+        timer=null;
         return;
       }
       return chrome.tabs.get(Stat.curTabId, function(tab) {
@@ -83,7 +89,7 @@
   });
 
 
-  console.log('\'Allo \'Allo! Event Page for Browser Action');
+  console.log('Browse Trucks is starting works');
 
 }).call(this);
 
@@ -91,5 +97,5 @@ function formatTime(seconds) {
   var hh = Math.floor(seconds / 3600),
     mm = Math.floor(seconds / 60) % 60,
     ss = Math.floor(seconds) % 60;
-  return ((hh<10)?'0'+hh:hh)+":"+((mm<mm)?'0'+mm:mm)+":"+((ss<ss)?'0'+ss:ss);
+  return ((mm<10)?'0'+mm:mm)+":"+((ss<10)?'0'+ss:ss);
 }
