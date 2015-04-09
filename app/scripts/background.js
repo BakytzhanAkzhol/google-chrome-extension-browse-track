@@ -1,17 +1,13 @@
- 'use strict';
- function formatTime(seconds) {
-  //var hh = Math.floor(seconds / 3600);
-  var mm = Math.floor(seconds / 60) % 60,
-  ss = Math.floor(seconds) % 60;
-  return ((mm<10)?'0'+mm:mm)+":"+((ss<10)?'0'+ss:ss);
-}
 (function() {
-  var Stat, calc, tabChanged, updateBadge,timer,res;
+  'use strict';
+  var Stat, calc, tabChanged, updateBadge;
+
   chrome.runtime.onInstalled.addListener(function(details) {
     return console.log('previousVersion', details.previousVersion);
   });
+
   chrome.browserAction.setBadgeText({
-    text: 'Hello'
+    text: 'Hello, World'
   });
 
   Stat = {
@@ -28,19 +24,17 @@
     Stat.cur = url;
     lst = Stat.data[url] || [];
     lst.push(new Date());
-    Stat.data[url]=lst;
-    return Stat.data[url];
+    return Stat.data[url] = lst;
   };
 
   calc = function(url) {
-    var i, lst, n, _i;
+    var i, lst, n, res, _i;
     lst = Stat.data[url];
     if (!lst) {
       return 0;
     }
     n = Math.floor(lst.length / 2);
     res = 0;
-    console.log(res);
     for (i = _i = 0; 0 <= n ? _i <= n : _i >= n; i = 0 <= n ? ++_i : --_i) {
       if (lst[2 * i + 1] && lst[2 * i]) {
         res += lst[2 * i + 1].getTime() - lst[2 * i].getTime();
@@ -51,44 +45,56 @@
   };
 
   updateBadge = function(url) {
-    var res;
+    var HH, MM, SS, hh, id, mm, res, ss, textTime;
     res = calc(url);
+    id = String(Stat.curTabId);
+    console.log(id);
+    chrome.storage.local.set(function(_arg) {
+      var res;
+      res = _arg.id;
+      return console.log(chrome.storage.local.get(id));
+    });
+    mm = res % 60;
+    hh = Math.floor(res / (3600 * 60000));
+    mm = Math.floor(res / 60000.);
+    ss = parseInt(((res % 60000) / 1000) % 60);
+    HH = hh <= 9 ? '0' + hh : hh;
+    MM = mm <= 9 ? '0' + mm : mm;
+    SS = ss <= 9 ? '0' + ss : ss;
+    textTime = hh <= 1 ? "" + MM + ":" + SS : "" + HH + ":" + MM + ":" + SS;
     return chrome.browserAction.setBadgeText({
-      text: "" + formatTime(res / 1000)
+      text: textTime
     });
   };
+
   chrome.tabs.onActivated.addListener(function(activeInfo) {
-    //console.log("Select " + activeInfo.tabId + " ");
+    console.log("Select " + activeInfo.tabId + " ");
     Stat.curTabId = activeInfo.tabId;
     return chrome.tabs.get(activeInfo.tabId, function(tab) {
       if (tab.url) {
         tabChanged(tab.url);
       }
-      timer=window.setInterval(function() {
-        return chrome.tabs.get(Stat.curTabId, function(tab) {
-       //   console.log(tab);
-          if (tab.url) {
-             return updateBadge(tab.url);
-          }
-          });
-    }, 1000);
       return updateBadge(tab.url);
     });
   });
 
-  chrome.tabs.onActiveChanged.addListener(function(){
-    if(timer!=null){
-      console.log("Interval is cleaner");
-      var n=''+Stat.curTabId;
-      clearInterval(timer);
-      timer=null;
-      
-      chrome.storage.sync.set({n:res}, function() {
-         chrome.storage.sync.get(n, function(data) {
-          var t=data;
-          console.log(t);
-        });
-      });}  
-    });
- // console.log('Browse Trucks is starting works');
+  chrome.alarms.onAlarm.addListener(function(alarm) {
+    if (alarm.name === "update") {
+      if (!Stat.curTabId) {
+        return;
+      }
+      return chrome.tabs.get(Stat.curTabId, function(tab) {
+        if (tab.url) {
+          return updateBadge(tab.url);
+        }
+      });
+    }
+  });
+
+  chrome.alarms.create("update", {
+    periodInMinutes: 0.010
+  });
+
+  console.log('\'Allo \'Allo! Event Page for Browser Action');
+
 }).call(this);
