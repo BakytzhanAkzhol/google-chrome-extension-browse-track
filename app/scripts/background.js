@@ -45,14 +45,16 @@
   };
 
   updateBadge = function(url) {
-    var HH, MM, SS, hh, id, mm, res, ss, textTime;
+    var HH, MM, SS, hh, lastTime, mm, res, ss, textTime, value;
     res = calc(url);
-    id = String(Stat.curTabId);
-    console.log(id);
-    chrome.storage.local.set(function(_arg) {
-      var res;
-      res = _arg.id;
-      return console.log(chrome.storage.local.get(id));
+    value ='value';
+    console.log(value);
+    lastTime = res + '';
+    chrome.storage.local.set({
+      value: lastTime
+    });
+    chrome.storage.local.get(value, function(data) {
+      return console.log(data);
     });
     mm = res % 60;
     hh = Math.floor(res / (3600 * 60000));

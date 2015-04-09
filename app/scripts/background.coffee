@@ -32,10 +32,12 @@ calc = (url)->
 
 updateBadge = (url)->
   res = calc url
-  id = String(Stat.curTabId)
-  console.log id
-  chrome.storage.local.set (id:res) ->
-    console.log chrome.storage.local.get(id)
+  value = Stat.cur;
+  console.log value;
+  lastTime=res+'';
+  chrome.storage.local.set ({value:lastTime }) 
+  chrome.storage.local.get (value) , (data)->
+    console.log data
   mm = res % 60
   hh = res // (3600*60000)
   mm = res // (60000)
